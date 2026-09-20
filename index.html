@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FPO Ledger — Mandi Collection Point</title>
+  <meta name="description" content="Digital weighbridge passes, produce grading ledger, fraud anomaly detection, farmer dispute resolution, and automated payout settlements for FPOs and Mandis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-layout">
+    <!-- Top Global Header Matching Reference Image -->
+    <header class="app-header">
+      <div class="header-left">
+        <!-- Sidebar Toggle Icon Button -->
+        <button id="sidebarToggleBtn" class="icon-toggle-btn" aria-label="Toggle Sidebar" title="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+        </button>
+
+        <!-- Operator ID Info Badge -->
+        <div class="operator-meta-pill">
+          <span class="op-label" data-i18n="operator_id_label">OPERATOR ID</span>
+          <span class="op-val" id="headerOpDisplay">ADM-4092 • FPO Admin</span>
+        </div>
+      </div>
+
+      <!-- Center Search Bar from Reference Image -->
+      <div class="header-search-wrap">
+        <svg class="header-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="header-search-input" id="globalHeaderSearch" placeholder="Search students, staff, transactions..." data-i18n-placeholder="global_search_placeholder">
+        <span class="header-search-kbd">⌘K</span>
+      </div>
+
+      <!-- Right Language, Theme & Status Controls -->
+      <div class="header-right-controls">
+        <!-- Language Switcher: English / Hindi Segmented Pill -->
+        <div class="lang-switcher-pill" role="group" aria-label="Language Switcher">
+          <button type="button" class="lang-toggle-btn active" id="langBtnEn" data-lang="en">English</button>
+          <button type="button" class="lang-toggle-btn" id="langBtnHi" data-lang="hi">हिन्दी</button>
+        </div>
+
+        <!-- Online Status Indicator Pill -->
+        <div class="online-status-badge">
+          <span class="pulse-green-dot"></span>
+          <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+          <span class="online-text" data-i18n="online_status">Online</span>
+        </div>
+
+        <!-- Celestial Day & Night Theme Toggle Switch Matching Reference Picture -->
+        <button id="themeToggleBtn" class="celestial-theme-toggle tooltip-trigger" data-tooltip="Switch Day / Night Mode" aria-label="Toggle Theme">
+          <div class="toggle-track">
+            <!-- Stars for Dark Night Mode -->
+            <div class="stars-backdrop">
+              <span class="star-sparkle star-1">✦</span>
+              <span class="star-sparkle star-2">·</span>
+              <span class="star-sparkle star-3">✦</span>
+            </div>
+            <!-- Clouds for Light Day Mode -->
+            <div class="day-clouds-backdrop">
+              <span class="cloud-puff-shape cp-1"></span>
+              <span class="cloud-puff-shape cp-2"></span>
+            </div>
+            <!-- Sliding celestial knob -->
+            <div class="toggle-thumb-celestial">
+              <div class="celestial-sun-body"></div>
+              <div class="celestial-moon-body">
+                <span class="crater-spot c-1"></span>
+                <span class="crater-spot c-2"></span>
+                <span class="crater-spot c-3"></span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        <!-- Notification Bell with Counter Badge -->
+        <button class="icon-btn notif-bell-btn tooltip-trigger" data-tooltip="4 Unread Notifications" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notif-badge-bubble">4</span>
+        </button>
+
+        <!-- User Profile Avatar Chip -->
+        <div class="user-profile-header-chip" id="headerProfileChip">
+          <div class="user-avatar-circle" id="headerAvatarCircle">AK</div>
+          <div class="user-info-text">
+            <span class="user-name-title" id="headerUserName">Anita Kapoor</span>
+            <span class="user-role-sub" id="headerUserRoleTitle">Principal Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Body Container -->
+    <div class="app-body">
+      <!-- Main Deep Forest Green Navigation Sidebar -->
+      <aside class="app-sidebar" id="appSidebar">
+        <!-- Brand Header Matching Reference Image -->
+        <div class="sidebar-brand">
+          <div class="brand-badge-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M7 20h10"></path>
+              <path d="M10 20c0-4 1-7 2-9"></path>
+              <path d="M12 11c1.5-2.5 4.5-3.5 7-3-1 3-3.5 5.5-7 5.5"></path>
+              <path d="M12 11c-1.5-2-4-2.5-6-2 .5 2.5 2.5 4.5 6 5"></path>
+            </svg>
+          </div>
+          <div class="brand-text-block">
+            <div class="brand-heading" data-i18n="brand_name">FPO Ledger</div>
+            <div class="brand-subheading" data-i18n="brand_subtitle">Mandi Collection Point</div>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <nav class="nav-menu">
+          <!-- Primary Navigation from Reference Image -->
+          <button class="nav-item active" data-tab="deliveries">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            <span class="nav-label" data-i18n="nav_my_deliveries">My Deliveries</span>
+            <span class="nav-count-badge" id="navDeliveryCount">5</span>
+          </button>
+
+          <button class="nav-item" data-tab="dashboard">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span class="nav-label" data-i18n="nav_dashboard">Dashboard</span>
+          </button>
+
+          <div class="nav-divider"></div>
+          <div class="nav-section-heading" data-i18n="nav_oversight_section">OFFICER OVERSIGHT</div>
+
+          <button class="nav-item" data-tab="ledger">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              <line x1="9" y1="7" x2="15" y2="7"></line>
+              <line x1="9" y1="11" x2="15" y2="11"></line>
+            </svg>
+            <span class="nav-label" data-i18n="nav_master_ledger">Master Ledger</span>
+          </button>
+
+          <button class="nav-item" data-tab="fraud">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span class="nav-label" data-i18n="nav_fraud_anomaly">Fraud & Anomaly</span>
+            <span class="nav-badge danger-badge" id="navHighRiskCount">3</span>
+          </button>
+
+          <button class="nav-item" data-tab="disputes">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span class="nav-label" data-i18n="nav_disputes">Officer Oversight</span>
+            <span class="nav-badge warning-badge" id="navDisputeCount">4</span>
+          </button>
+
+          <button class="nav-item" data-tab="settlement">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span class="nav-label" data-i18n="nav_settlements">Payout Settlement</span>
+          </button>
+
+          <button class="nav-item" data-tab="audit">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span class="nav-label" data-i18n="nav_audit_trail">Audit Trail</span>
+          </button>
+
+          <button class="nav-item" data-tab="rates">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="2" y1="10" x2="22" y2="10"></line>
+            </svg>
+            <span class="nav-label" data-i18n="nav_rate_cards">Rate Cards (v2.3)</span>
+          </button>
+        </nav>
+
+        <!-- Sidebar Bottom Live Indicator -->
+        <div class="sidebar-footer">
+          <div class="device-sync-card">
+            <div class="sync-header">
+              <span class="sync-title" data-i18n="field_app_sync">Field Sync Stream</span>
+              <span class="sync-live-tag"><span class="ping-dot"></span> LIVE</span>
+            </div>
+            <div class="sync-metrics">
+              <div class="sync-metric-item">
+                <span class="sm-label" data-i18n="active_operators">Active Ops</span>
+                <span class="sm-val" id="sbActiveOps">28 / 30</span>
+              </div>
+              <div class="sync-metric-item">
+                <span class="sm-label" data-i18n="mandi_location">Mandi Cluster</span>
+                <span class="sm-val">Ratlam Mandi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Dynamic Content Workspace -->
+      <main class="app-main-content">
+
+        <!-- ================= TAB: MY DELIVERIES (EXACT MATCH WITH USER IMAGE) ================= -->
+        <section id="tab-deliveries" class="tab-pane active">
+          <!-- Page Header -->
+          <div class="page-intro-header">
+            <h1 class="hero-page-title" data-i18n="deliveries_title">My Deliveries</h1>
+            <p class="hero-page-subtitle" data-i18n="deliveries_subtitle">Digital weighbridge passes for your lots at Ratlam Mandi.</p>
+          </div>
+
+          <!-- 3 Summary Metric Cards Matching Image -->
+          <div class="delivery-metrics-grid">
+            <!-- Card 1: My lots -->
+            <div class="delivery-metric-card">
+              <div class="dm-icon-badge green-cube">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </div>
+              <div class="dm-body">
+                <span class="dm-label" data-i18n="metric_my_lots">My lots</span>
+                <span class="dm-val" id="userLotsCount">5</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Estimated value -->
+            <div class="delivery-metric-card">
+              <div class="dm-icon-badge green-rupee">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="6" y1="5" x2="18" y2="5"></line>
+                  <line x1="6" y1="9" x2="18" y2="9"></line>
+                  <path d="M6 13h5a4 4 0 0 0 4-4"></path>
+                  <line x1="9" y1="13" x2="16" y2="20"></line>
+                </svg>
+              </div>
+              <div class="dm-body">
+                <span class="dm-label" data-i18n="metric_estimated_val">Estimated value</span>
+                <span class="dm-val" id="userEstimatedValue">₹57,649</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Pending verification -->
+            <div class="delivery-metric-card">
+              <div class="dm-icon-badge amber-shield">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="dm-body">
+                <span class="dm-label" data-i18n="metric_pending_verif">Pending verification</span>
+                <span class="dm-val" id="userPendingCount">2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery / Weighbridge Pass Cards Grid -->
+          <div class="passes-cards-grid" id="deliveryPassesContainer">
+            <!-- Populated dynamically via JS to match reference image -->
+          </div>
+        </section>
+
+        <!-- ================= TAB: DASHBOARD / OVERVIEW (EXACT REFERENCE REPLICA) ================= -->
+        <section id="tab-dashboard" class="tab-pane">
+          <!-- Page Header Row Matching Reference Image -->
+          <div class="page-intro-header-row">
+            <div class="page-intro-left">
+              <span class="overview-eyebrow">OVERVIEW</span>
+              <h1 class="hero-page-title" id="dashGreetingTitle">Good morning, Anita 👋</h1>
+              <p class="hero-page-subtitle">Here's what's happening across fees, payments and communications today.</p>
+            </div>
+            <div class="page-intro-right-actions">
+              <div class="live-sync-indicator-pill">
+                <span class="pulse-green-dot"></span>
+                <span>Live sync active</span>
+              </div>
+              <button class="btn-cyan-report" id="btnGenerateReport">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                </svg>
+                <span>Generate Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Summary Metric Cards Matching Reference Image -->
+          <div class="overview-metrics-grid">
+            <!-- Card 1: Total Revenue (₹42.9L) -->
+            <div class="overview-metric-card">
+              <div class="om-top-row">
+                <div class="om-icon-box cyan-mint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="6" y1="5" x2="18" y2="5"></line>
+                    <line x1="6" y1="9" x2="18" y2="9"></line>
+                    <path d="M6 13h5a4 4 0 0 0 4-4"></path>
+                    <line x1="9" y1="13" x2="16" y2="20"></line>
+                  </svg>
+                </div>
+                <span class="om-badge green">📈 +5.2% this month</span>
+              </div>
+              <div class="om-bottom-data">
+                <div class="om-val" id="cardTotalRevenueDash">₹42.9L</div>
+                <div class="om-label">Total Revenue</div>
+              </div>
+            </div>
+
+            <!-- Card 2: Pending Dues (₹6.3L) -->
+            <div class="overview-metric-card">
+              <div class="om-top-row">
+                <div class="om-icon-box orange-trend">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                    <polyline points="17 18 23 18 23 12"></polyline>
+                  </svg>
+                </div>
+                <span class="om-badge orange">📉 -2.1% vs last month</span>
+              </div>
+              <div class="om-bottom-data">
+                <div class="om-val" id="cardPendingDuesDash">₹6.3L</div>
+                <div class="om-label">Pending Dues</div>
+              </div>
+            </div>
+
+            <!-- Card 3: Active Defaulters (35) -->
+            <div class="overview-metric-card">
+              <div class="om-top-row">
+                <div class="om-icon-box coral-alert">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+                <span class="om-badge coral">⚠️ +3 new this week</span>
+              </div>
+              <div class="om-bottom-data">
+                <div class="om-val" id="cardDefaultersDash">35</div>
+                <div class="om-label">Active Defaulters</div>
+              </div>
+            </div>
+
+            <!-- Card 4: UPI vs Cash (79/21) -->
+            <div class="overview-metric-card">
+              <div class="om-top-row">
+                <div class="om-icon-box sky-blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                </div>
+                <span class="om-badge blue">⚡ UPI adoption ↑</span>
+              </div>
+              <div class="om-bottom-data">
+                <div class="om-val" id="cardUpiRatioDash">79/21</div>
+                <div class="om-label">UPI vs Cash</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Collection Pulse Section & Smooth Glowing Curve Chart -->
+          <div class="pulse-card">
+            <div class="pulse-card-header">
+              <div class="pulse-title-wrap">
+                <div class="pulse-icon-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="pulse-title">Today's Collection Pulse</h2>
+                  <p class="pulse-subtitle">Live fee collections across the school day</p>
+                </div>
+              </div>
+              <div class="pulse-live-badge">
+                <span class="pulse-green-dot"></span>
+                <span>Live</span>
+              </div>
+            </div>
+
+            <div class="pulse-amount-row">
+              <span class="pulse-highlight-amt">₹8,76,387</span>
+              <span class="pulse-sub-text">collected today</span>
+            </div>
+
+            <!-- Interactive SVG Line Chart Matching Reference Image -->
+            <div class="pulse-chart-wrap">
+              <svg class="pulse-chart-svg" viewBox="0 0 1000 200" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Grid lines & Y-labels -->
+                <line x1="60" y1="30" x2="980" y2="30" class="chart-grid-line"></line>
+                <text x="15" y="34" class="chart-y-label">₹300K</text>
+
+                <line x1="60" y1="95" x2="980" y2="95" class="chart-grid-line"></line>
+                <text x="15" y="99" class="chart-y-label">₹225K</text>
+
+                <line x1="60" y1="160" x2="980" y2="160" class="chart-grid-line"></line>
+                <text x="15" y="164" class="chart-y-label">₹150K</text>
+
+                <!-- Area Fill -->
+                <path d="M 60,195 Q 240,175 420,130 T 780,75 L 980,45 L 980,195 L 60,195 Z" class="chart-area-fill"></path>
+
+                <!-- Glowing Line -->
+                <path d="M 60,195 Q 240,175 420,130 T 780,75 L 980,45" class="chart-line-glow"></path>
+                <path d="M 60,195 Q 240,175 420,130 T 780,75 L 980,45" class="chart-line"></path>
+
+                <!-- Data Node Circles -->
+                <circle cx="60" cy="195" r="4.5" class="chart-node-circle"></circle>
+                <circle cx="420" cy="130" r="4.5" class="chart-node-circle"></circle>
+                <circle cx="780" cy="75" r="4.5" class="chart-node-circle"></circle>
+                <circle cx="980" cy="45" r="5" class="chart-node-circle"></circle>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Actions -->
+          <div class="dash-quick-links mt-4">
+            <button class="quick-link-btn" onclick="switchTab('ledger')">
+              <div class="ql-icon">📄</div>
+              <div class="ql-text">
+                <strong data-i18n="ql_master_ledger">Master Ledger Khata</strong>
+                <span data-i18n="ql_master_ledger_sub">View 1,842 immutable entries</span>
+              </div>
+            </button>
+            <button class="quick-link-btn" onclick="switchTab('fraud')">
+              <div class="ql-icon">⚠️</div>
+              <div class="ql-text">
+                <strong data-i18n="ql_fraud_engine">Statistical Fraud Engine</strong>
+                <span data-i18n="ql_fraud_engine_sub">3 operators flagged above 2.5σ</span>
+              </div>
+            </button>
+            <button class="quick-link-btn" onclick="switchTab('disputes')">
+              <div class="ql-icon">🛡️</div>
+              <div class="ql-text">
+                <strong data-i18n="ql_dispute_wb">Dispute Adjudication</strong>
+                <span data-i18n="ql_dispute_wb_sub">4 open farmer photo claims</span>
+              </div>
+            </button>
+            <button class="quick-link-btn" onclick="switchTab('settlement')">
+              <div class="ql-icon">💰</div>
+              <div class="ql-text">
+                <strong data-i18n="ql_payout_run">Payout Settlement</strong>
+                <span data-i18n="ql_payout_run_sub">24 beneficiary accounts ready</span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- ================= TAB: MASTER LEDGER ================= -->
+        <section id="tab-ledger" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="ledger_breadcrumbs">Ledger Repository / Immutable Master Khata</div>
+              <h1 class="page-title" data-i18n="ledger_title">Locked Grading Ledger</h1>
+              <p class="page-desc" data-i18n="ledger_desc">Single source of truth. Every grading entry is cryptographically locked upon field submission. Editing or deleting is permanently restricted.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-secondary" id="btnExportLedger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span data-i18n="btn_export_csv">Export CSV / Ledger</span>
+              </button>
+              <button class="btn btn-outline" id="btnVerifyChain">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span data-i18n="btn_verify_merkle">Verify Merkle Tree (100%)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Control Toolbar -->
+          <div class="filter-toolbar">
+            <div class="search-input-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="ledgerSearchInput" class="filter-search-input" placeholder="Search by Farmer Name, ID (FMR-xxx), Entry ID, or Operator..." data-i18n-placeholder="search_placeholder">
+            </div>
+
+            <div class="filter-selects-row">
+              <div class="filter-group">
+                <label data-i18n="filter_grade">Grade</label>
+                <select id="filterGrade" class="filter-select">
+                  <option value="ALL">All Grades (A, B, C)</option>
+                  <option value="A">Grade A (Premium)</option>
+                  <option value="B">Grade B (Standard)</option>
+                  <option value="C">Grade C (Sub-standard)</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label data-i18n="filter_operator">Operator</label>
+                <select id="filterOperator" class="filter-select">
+                  <option value="ALL">All Field Operators</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label data-i18n="filter_center">Collection Center</label>
+                <select id="filterCenter" class="filter-select">
+                  <option value="ALL">All Centers</option>
+                  <option value="Dindori Center A">Dindori Center A</option>
+                  <option value="Pimpalgaon Main Mandi">Pimpalgaon Main Mandi</option>
+                  <option value="Niphad Agri Hub">Niphad Agri Hub</option>
+                  <option value="Yeola Rural Center">Yeola Rural Center</option>
+                  <option value="Sinnar Collection Yard">Sinnar Collection Yard</option>
+                  <option value="Kalwan Sub-Center">Kalwan Sub-Center</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label data-i18n="filter_status">Status</label>
+                <select id="filterStatus" class="filter-select">
+                  <option value="ALL">All Records</option>
+                  <option value="LOCKED">Standard Locked</option>
+                  <option value="DISPUTED">Under Dispute Hold</option>
+                  <option value="CORRECTED">Append-Corrected</option>
+                </select>
+              </div>
+
+              <button id="btnResetFilters" class="btn btn-ghost" title="Reset all filters" data-i18n="btn_reset">Reset</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-card">
+            <div class="table-header-meta">
+              <div class="thm-left">
+                <span class="table-entries-count" id="ledgerShowingCount">Showing entries</span>
+                <span class="audit-guarantee-tag">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  <span data-i18n="merkle_locked_tag">Cryptographically Locked SHA-256</span>
+                </span>
+              </div>
+              <div class="thm-right">
+                <span class="pagination-info"><span data-i18n="page_label">Page</span> <span id="currentPageNum">1</span> <span data-i18n="of_label">of</span> <span id="totalPageCount">4</span></span>
+                <div class="table-pagination-btns">
+                  <button class="btn btn-icon-small" id="btnPrevPage" disabled aria-label="Previous page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <button class="btn btn-icon-small" id="btnNextPage" aria-label="Next page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table" id="ledgerTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="th_entry_id">Entry ID</th>
+                    <th data-i18n="th_datetime">Date & Time</th>
+                    <th data-i18n="th_farmer">Farmer Name & ID</th>
+                    <th data-i18n="th_operator">Field Operator</th>
+                    <th data-i18n="th_center">Collection Center</th>
+                    <th data-i18n="th_produce">Crop Produce</th>
+                    <th class="text-center" data-i18n="th_grade">Grade</th>
+                    <th class="text-right" data-i18n="th_weight">Weight (kg)</th>
+                    <th class="text-right" data-i18n="th_rate">Rate (₹/kg)</th>
+                    <th class="text-right" data-i18n="th_payout">Payout (₹)</th>
+                    <th class="text-center" data-i18n="th_photo">Photo Evidence</th>
+                    <th class="text-center" data-i18n="th_status">Status</th>
+                    <th class="text-right" data-i18n="th_action">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="ledgerTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: FRAUD & ANOMALY DETECTION ================= -->
+        <section id="tab-fraud" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="fraud_breadcrumbs">Risk Oversight / Statistical Anomaly Engine</div>
+              <h1 class="page-title" data-i18n="fraud_title">Operator Fraud & Anomaly Detection</h1>
+              <p class="page-desc" data-i18n="fraud_desc">Automated peer-benchmarking statistical engine compares operator grade allocations, grading velocity, and farmer bias to detect tampering.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-primary" id="btnRecalcAnomalies">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span data-i18n="btn_recalc_risk">Recalculate Risk Scores</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Benchmark Info Banner -->
+          <div class="benchmark-banner">
+            <div class="bb-left">
+              <div class="bb-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+              </div>
+              <div class="bb-content">
+                <div class="bb-title" data-i18n="benchmark_title">Regional Peer Benchmark Standard (Ratlam & Malwa Agri Zone)</div>
+                <div class="bb-desc" data-i18n="benchmark_desc">Derived from 42,800 historical entries across 90 field operators this season. Normal Gaussian standard: Grade A = 48.0%, Grade B = 36.0%, Grade C = 16.0%.</div>
+              </div>
+            </div>
+            <div class="bb-pills">
+              <div class="bb-pill">
+                <span class="bb-pill-label">Grade A Benchmark</span>
+                <span class="bb-pill-val color-a">48.0%</span>
+              </div>
+              <div class="bb-pill">
+                <span class="bb-pill-label">Grade B Benchmark</span>
+                <span class="bb-pill-val color-b">36.0%</span>
+              </div>
+              <div class="bb-pill">
+                <span class="bb-pill-label">Grade C Benchmark</span>
+                <span class="bb-pill-val color-c">16.0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- High Risk Operator Leaderboard & Cards -->
+          <div class="anomaly-dashboard-layout">
+            <div class="anomaly-list-panel">
+              <div class="panel-header">
+                <div class="ph-title-wrap">
+                  <h2 class="panel-title" data-i18n="risk_leaderboard">Ranked Risk Leaderboard</h2>
+                  <span class="panel-subtitle" data-i18n="risk_leaderboard_sub">Operators with statistical variance &gt; 2.5σ or rapid velocity</span>
+                </div>
+                <div class="risk-filter-chips">
+                  <button class="chip-btn active" data-risk-filter="ALL">All (12)</button>
+                  <button class="chip-btn high" data-risk-filter="HIGH">High Risk (3)</button>
+                  <button class="chip-btn med" data-risk-filter="MEDIUM">Med Risk (4)</button>
+                  <button class="chip-btn low" data-risk-filter="LOW">Normal (5)</button>
+                </div>
+              </div>
+
+              <div class="operator-risk-cards" id="operatorRiskCardsContainer">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <div class="anomaly-detail-panel" id="operatorDetailPanel">
+              <!-- Injected via JavaScript upon operator card selection -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: DISPUTE RESOLUTION PANEL ================= -->
+        <section id="tab-disputes" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="dispute_breadcrumbs">Dispute Intake / Evidence-Based Adjudication</div>
+              <h1 class="page-title" data-i18n="dispute_title">Farmer Dispute Resolution Workbench</h1>
+              <p class="page-desc" data-i18n="dispute_desc">Investigate farmer complaints against assigned grades using original field photographs, captured weights, and grading standards. Decisions generate append-only corrections.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-primary" id="btnOpenNewDisputeModal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span data-i18n="btn_log_dispute">Log New Farmer Complaint</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dispute Cases Workspace -->
+          <div class="disputes-layout">
+            <div class="disputes-list-sidebar">
+              <div class="panel-header">
+                <div class="ph-title-wrap">
+                  <h2 class="panel-title" data-i18n="dispute_queue">Dispute Queue</h2>
+                  <span class="panel-subtitle" data-i18n="dispute_queue_sub">Active cases under adjudication</span>
+                </div>
+                <div class="status-tab-pills">
+                  <button class="status-tab active" data-dispute-status="OPEN"><span data-i18n="status_open">Open</span> (<span id="countOpenDisputes">3</span>)</button>
+                  <button class="status-tab" data-dispute-status="UNDER_REVIEW"><span data-i18n="status_reviewing">Reviewing</span> (1)</button>
+                  <button class="status-tab" data-dispute-status="RESOLVED"><span data-i18n="status_resolved">Resolved</span> (8)</button>
+                </div>
+              </div>
+
+              <div class="disputes-cases-list" id="disputeCasesList">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <div class="dispute-workbench-main" id="disputeWorkbenchMain">
+              <!-- Injected via JavaScript upon dispute case selection -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: PAYOUT SETTLEMENT MODULE ================= -->
+        <section id="tab-settlement" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="payout_breadcrumbs">Financial Settlement / Automated Payout Runs</div>
+              <h1 class="page-title" data-i18n="payout_title">Farmer Payout Settlement Engine</h1>
+              <p class="page-desc" data-i18n="payout_desc">Automated computation of farmer dues aggregated by produce grade and locked weight. Entries under open dispute are quarantined from payout runs.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-secondary" id="btnExportPayoutCSV">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span data-i18n="btn_export_payout">Export Bank List (CSV)</span>
+              </button>
+              <button class="btn btn-primary" id="btnFinalizePayoutRun">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                <span data-i18n="btn_finalize_payout">Finalize & Lock Payout Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quarantine Banner -->
+          <div class="quarantine-banner" id="payoutQuarantineBanner">
+            <div class="qb-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div class="qb-content">
+              <div class="qb-title" data-i18n="quarantine_title">Automatic Dispute Quarantine Active</div>
+              <div class="qb-desc"><span data-i18n="quarantine_desc_1">3 entries totaling</span> <strong id="quarantineKg">524.0 kg</strong> (<span data-i18n="hold_val">Hold value:</span> <strong id="quarantineAmt">₹9,430</strong>) <span data-i18n="quarantine_desc_2">have unresolved farmer disputes and are excluded from this batch.</span></div>
+            </div>
+          </div>
+
+          <!-- Payout Metrics Grid -->
+          <div class="settlement-metrics-grid">
+            <div class="sm-card">
+              <span class="sm-card-label" data-i18n="payout_beneficiaries">Eligible Beneficiaries</span>
+              <span class="sm-card-val" id="payoutEligibleFarmers">24 Farmers</span>
+              <span class="sm-card-sub" data-i18n="kyc_verified_sub">All verified Bank/Aadhaar accounts</span>
+            </div>
+            <div class="sm-card">
+              <span class="sm-card-label" data-i18n="payout_verified_weight">Total Verified Weight</span>
+              <span class="sm-card-val" id="payoutTotalWeight">17,926.8 kg</span>
+              <span class="sm-card-sub" data-i18n="excl_dispute_sub">Excludes 524.0 kg in dispute</span>
+            </div>
+            <div class="sm-card">
+              <span class="sm-card-label" data-i18n="payout_gross_amt">Gross Amount</span>
+              <span class="sm-card-val" id="payoutGrossAmount">₹4,29,490</span>
+              <span class="sm-card-sub" data-i18n="calc_ledger_sub">Calculated via locked ledger</span>
+            </div>
+            <div class="sm-card highlight">
+              <span class="sm-card-label" data-i18n="payout_net_payable">Net Payable Settlement</span>
+              <span class="sm-card-val text-primary" id="payoutNetAmount">₹4,29,490</span>
+              <span class="sm-card-sub" data-i18n="ready_disburse_sub">Ready for dual sign-off</span>
+            </div>
+          </div>
+
+          <!-- Aggregated Farmer Settlement Table -->
+          <div class="table-card">
+            <div class="table-header-meta">
+              <div class="thm-left">
+                <span class="table-entries-count" data-i18n="itemized_payout_title">Itemized Farmer Settlement Breakdown (24 Beneficiaries)</span>
+              </div>
+              <div class="thm-right">
+                <input type="text" id="payoutFarmerSearch" class="search-input-small" placeholder="Filter farmer name/ID..." data-i18n-placeholder="search_farmer_placeholder">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table" id="payoutTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="th_farmer">Farmer Name & ID</th>
+                    <th data-i18n="th_village">Village & Center</th>
+                    <th class="text-right" data-i18n="th_grade_a">Grade A (kg)</th>
+                    <th class="text-right" data-i18n="th_grade_b">Grade B (kg)</th>
+                    <th class="text-right" data-i18n="th_grade_c">Grade C (kg)</th>
+                    <th class="text-right" data-i18n="th_total_wt">Total Weight (kg)</th>
+                    <th class="text-right" data-i18n="th_gross_amt">Gross Amount</th>
+                    <th class="text-right" data-i18n="th_dispute_hold">Dispute Hold</th>
+                    <th class="text-right" data-i18n="th_net_payable">Net Payable (₹)</th>
+                    <th class="text-center" data-i18n="th_status">Status</th>
+                    <th class="text-right" data-i18n="th_ledger_entries">Entries</th>
+                  </tr>
+                </thead>
+                <tbody id="payoutTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: AUDIT TRAIL ================= -->
+        <section id="tab-audit" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="audit_breadcrumbs">Governance & Compliance / Immutable Ledger Proof</div>
+              <h1 class="page-title" data-i18n="audit_title">System Audit Log & Traceability</h1>
+              <p class="page-desc" data-i18n="audit_desc">Every view, fraud flag transition, dispute resolution, rate card modification, and payout authorization is recorded in this append-only audit trail.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-secondary" id="btnExportAuditLog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span data-i18n="btn_export_audit">Export Audit Trail</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="audit-log-card">
+            <div class="audit-filter-bar">
+              <input type="text" id="auditSearchInput" class="filter-search-input" placeholder="Search audit events, actors, entry IDs..." data-i18n-placeholder="search_audit_placeholder">
+              <select id="auditActionFilter" class="filter-select">
+                <option value="ALL">All Action Types</option>
+                <option value="DISPUTE_RESOLUTION">Dispute Adjudications</option>
+                <option value="APPEND_CORRECTION">Append-Only Corrections</option>
+                <option value="OPERATOR_STATUS">Operator Risk Flags</option>
+                <option value="PAYOUT_FINALIZED">Payout Sign-Offs</option>
+                <option value="RATE_CARD_CHANGE">Rate Card Changes</option>
+              </select>
+            </div>
+
+            <div class="audit-timeline" id="auditTimelineContainer">
+              <!-- Injected via JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB: RATE CARDS CONFIG ================= -->
+        <section id="tab-rates" class="tab-pane">
+          <div class="page-topbar">
+            <div>
+              <div class="page-breadcrumbs" data-i18n="rates_breadcrumbs">Financial Configuration / Grade-Wise Pricing</div>
+              <h1 class="page-title" data-i18n="rates_title">Produce Rate Card Manager</h1>
+              <p class="page-desc" data-i18n="rates_desc">Configure procurement rates per kg for Grade A, B, and C produce. Historical versions are preserved to guarantee past payout integrity.</p>
+            </div>
+            <div class="page-topbar-actions">
+              <button class="btn btn-primary" id="btnCreateNewRateVersion">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span data-i18n="btn_publish_rate">Publish New Rate Card</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="rate-cards-layout">
+            <div class="rate-card-current-card">
+              <div class="rc-card-header">
+                <div class="rc-badge-active" data-i18n="active_rate_badge">ACTIVE RATE CARD (v2.3)</div>
+                <div class="rc-published-info" data-i18n="rate_published_info">Effective from: 01 September 2026 • Mandi Board Ratlam</div>
+              </div>
+              <div class="rates-display-grid">
+                <div class="rate-box grade-a-box">
+                  <div class="rb-grade" data-i18n="grade_a_title">GRADE A (PREMIUM)</div>
+                  <div class="rb-price">₹28.00 <span class="rb-unit">/ kg</span></div>
+                  <div class="rb-desc" data-i18n="grade_a_desc">High firmness, uniform color &gt;90%, zero blemishes, grain size &gt;70mm.</div>
+                </div>
+                <div class="rate-box grade-b-box">
+                  <div class="rb-grade" data-i18n="grade_b_title">GRADE B (STANDARD)</div>
+                  <div class="rb-price">₹21.00 <span class="rb-unit">/ kg</span></div>
+                  <div class="rb-desc" data-i18n="grade_b_desc">Moderate firmness, minor color variation, &lt;5% superficial blemish.</div>
+                </div>
+                <div class="rate-box grade-c-box">
+                  <div class="rb-grade" data-i18n="grade_c_title">GRADE C (SUB-STANDARD)</div>
+                  <div class="rb-price">₹14.00 <span class="rb-unit">/ kg</span></div>
+                  <div class="rb-desc" data-i18n="grade_c_desc">Small size, irregular shape, &gt;10% surface marks, processing quality.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rate-card-history-panel">
+              <h3 class="history-title" data-i18n="version_history_title">Version History & Archival</h3>
+              <div class="rate-history-list" id="rateHistoryList">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ================= MODALS & DRAWERS ================= -->
+
+    <!-- Modal: Digital Weighbridge Pass Slip (Printable Receipt) -->
+    <div class="modal-overlay" id="weighbridgePassModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <div class="modal-badge-green" data-i18n="digital_pass_badge">OFFICIAL WEIGHBRIDGE PASS</div>
+            <h2 class="modal-title" id="passModalTitle">Weighbridge Receipt</h2>
+            <p class="modal-sub" id="passModalSub">Ratlam Agricultural Produce Market Committee (APMC)</p>
+          </div>
+          <button class="modal-close-btn" id="btnClosePassModal" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="receipt-slip" id="weighbridgeReceiptContent">
+            <!-- Injected dynamically via JavaScript -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnPrintPassSlip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span data-i18n="btn_print_receipt">Print Pass Receipt</span>
+          </button>
+          <button class="btn btn-outline" id="btnPassRaiseDispute">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span data-i18n="btn_raise_dispute">Raise Dispute</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 1: Append-Only Correction Record Drawer -->
+    <div class="modal-overlay" id="correctionModal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <div class="modal-badge-warn" data-i18n="append_corr_badge">APPEND-ONLY CORRECTION (FR1.5)</div>
+            <h2 class="modal-title" data-i18n="corr_modal_title">Issue Linked Correction Record</h2>
+            <p class="modal-sub" data-i18n="corr_modal_sub">Original locked entry remains 100% untouched. This creates a linked adjustment record with audit trail.</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseCorrectionModal" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="correction-comparison-grid">
+            <div class="cc-box original">
+              <div class="cc-box-title"><span data-i18n="orig_entry_label">ORIGINAL LOCKED ENTRY</span> (<span id="corrOrigId">ENT-9042</span>)</div>
+              <div class="cc-data-item"><span class="cc-label" data-i18n="th_farmer">Farmer:</span> <strong id="corrOrigFarmer">Ramesh Patil</strong></div>
+              <div class="cc-data-item"><span class="cc-label" data-i18n="th_operator">Operator:</span> <span id="corrOrigOp">Sachin Kale (OP-4092)</span></div>
+              <div class="cc-data-item"><span class="cc-label" data-i18n="th_grade">Assigned Grade:</span> <span class="grade-pill pill-c" id="corrOrigGrade">Grade C</span></div>
+              <div class="cc-data-item"><span class="cc-label" data-i18n="th_weight">Recorded Weight:</span> <span id="corrOrigWeight">142.5 kg</span></div>
+              <div class="cc-data-item"><span class="cc-label" data-i18n="th_payout">Computed Amount:</span> <strong id="corrOrigAmount">₹1,995.00</strong></div>
+            </div>
+
+            <div class="cc-box new">
+              <div class="cc-box-title" data-i18n="corr_delta_label">LINKED CORRECTION DELTA</div>
+              <div class="form-group">
+                <label data-i18n="corrected_grade_label">Corrected Grade</label>
+                <select id="corrNewGrade" class="form-control">
+                  <option value="A">Grade A (₹28/kg)</option>
+                  <option value="B">Grade B (₹21/kg)</option>
+                  <option value="C">Grade C (₹14/kg)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label data-i18n="verified_weight_label">Verified Weight (kg)</label>
+                <input type="number" step="0.1" id="corrNewWeight" class="form-control" value="142.5">
+              </div>
+              <div class="cc-data-item delta-row">
+                <span class="cc-label" data-i18n="net_adj_label">Net Adjustment Owed:</span>
+                <strong class="text-success" id="corrDeltaAmount">+₹1,995.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt-3">
+            <label><span data-i18n="justification_label">Formal Justification / Findings</span> <span class="text-danger">*</span></label>
+            <textarea id="corrReason" class="form-control" rows="3" placeholder="Provide detailed evidence-based reason for this append-only correction..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label data-i18n="approver_label">Approving Officer Identity</label>
+            <input type="text" id="corrApprover" class="form-control" value="Anjali Patil (FPO Officer)" readonly>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelCorrection" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-primary" id="btnSubmitCorrection">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span data-i18n="btn_commit_corr">Commit Append-Only Correction</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Photo Evidence Inspection Loupe -->
+    <div class="modal-overlay" id="photoModal">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title" data-i18n="photo_modal_title">Point-of-Collection Photo Evidence</h2>
+            <p class="modal-sub" id="photoModalSub" data-i18n="photo_modal_sub">Captured by Field Operator during weigh-in • Tamper-proof metadata</p>
+          </div>
+          <button class="modal-close-btn" id="btnClosePhotoModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body photo-inspector-body">
+          <div class="photo-viewer-container">
+            <div class="photo-viewer-wrap" id="photoViewerWrap">
+              <img id="photoModalImg" src="" alt="Produce sample evidence">
+              <div class="photo-crosshair"></div>
+            </div>
+            <div class="photo-zoom-toolbar">
+              <button class="zoom-btn" id="btnZoomOut">-</button>
+              <span id="zoomLevelDisplay">100%</span>
+              <button class="zoom-btn" id="btnZoomIn">+</button>
+              <button class="zoom-btn" id="btnZoomReset">Reset</button>
+            </div>
+          </div>
+          <div class="photo-meta-sidebar">
+            <div class="meta-section-title" data-i18n="meta_audit_title">METADATA AUDIT</div>
+            <div class="meta-grid">
+              <div class="meta-item"><span class="m-lbl">Entry ID</span><span class="m-val" id="pmEntryId">-</span></div>
+              <div class="meta-item"><span class="m-lbl">Captured At</span><span class="m-val" id="pmTimestamp">-</span></div>
+              <div class="meta-item"><span class="m-lbl">Operator</span><span class="m-val" id="pmOperator">-</span></div>
+              <div class="meta-item"><span class="m-lbl">Farmer</span><span class="m-val" id="pmFarmer">-</span></div>
+              <div class="meta-item"><span class="m-lbl">Assigned Grade</span><span class="m-val" id="pmGrade">-</span></div>
+              <div class="meta-item"><span class="m-lbl">Scale Weight</span><span class="m-val" id="pmWeight">-</span></div>
+              <div class="meta-item"><span class="m-lbl">GPS Geo-Tag</span><span class="m-val" id="pmGps">20.0059° N, 73.7898° E (Verified Mandi)</span></div>
+              <div class="meta-item"><span class="m-lbl">SHA-256 Hash</span><span class="m-val mono" id="pmHash">e3b0c44298fc1c149afbf4c8996fb924</span></div>
+            </div>
+
+            <div class="standard-spec-card mt-3">
+              <div class="ssc-title" data-i18n="visual_grading_ref">Visual Grading Reference</div>
+              <div class="ssc-content" id="pmGradeSpecs">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 3: Finalize & Sign Off Payout Run -->
+    <div class="modal-overlay" id="finalizePayoutModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <div class="modal-badge-primary" data-i18n="dual_sign_badge">DUAL SIGN-OFF PROTOCOL</div>
+            <h2 class="modal-title" data-i18n="finalize_payout_title">Finalize Payout Batch</h2>
+            <p class="modal-sub" data-i18n="finalize_payout_sub">Lock settlement batch for financial disbursement. No further adjustments permitted.</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseFinalizeModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="finalize-summary-box">
+            <div class="fsb-row"><span class="fsb-label">Settlement Batch:</span> <strong>BATCH-2026-09-SEP-FPO</strong></div>
+            <div class="fsb-row"><span class="fsb-label">Total Farmers:</span> <strong id="finFarmerCount">24 Farmers</strong></div>
+            <div class="fsb-row"><span class="fsb-label">Total Weight:</span> <strong id="finTotalWeight">17,926.8 kg</strong></div>
+            <div class="fsb-row"><span class="fsb-label">Gross Net Payable:</span> <strong class="text-primary text-xl" id="finTotalAmount">₹4,29,490.00</strong></div>
+            <div class="fsb-row"><span class="fsb-label">Quarantined Holds:</span> <span class="text-warning">3 entries excluded (₹9,430)</span></div>
+          </div>
+
+          <div class="dual-auth-section mt-3">
+            <div class="form-group">
+              <label>HQ Administrator Signature / PIN</label>
+              <input type="password" id="payoutAdminPin" class="form-control" value="••••••••" placeholder="Enter HQ Admin Passcode">
+            </div>
+            <div class="form-group">
+              <label>Audit Memo</label>
+              <input type="text" id="payoutAuditMemo" class="form-control" value="Monthly produce settlement approved following anomaly review.">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelFinalize" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-primary" id="btnConfirmFinalize">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span data-i18n="btn_auth_payout">Authorize & Seal Payout Batch</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 4: Log New Farmer Complaint -->
+    <div class="modal-overlay" id="newDisputeModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title" data-i18n="new_dispute_title">Log Farmer Produce Complaint</h2>
+            <p class="modal-sub" data-i18n="new_dispute_sub">Link intake complaint to a locked master ledger entry</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseNewDisputeModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label><span data-i18n="select_entry_label">Select Locked Ledger Entry</span> <span class="text-danger">*</span></label>
+            <select id="newDisputeEntrySelect" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="claimed_grade_label">Farmer Claimed Grade</label>
+            <select id="newDisputeClaimedGrade" class="form-control">
+              <option value="A">Grade A (Claims produce was premium)</option>
+              <option value="B">Grade B (Claims produce was standard)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="intake_channel_label">Intake Channel</label>
+            <select id="newDisputeChannel" class="form-control">
+              <option value="In-Person at FPO Center">In-Person at FPO Center</option>
+              <option value="Toll-Free Farmer Helpline">Toll-Free Farmer Helpline</option>
+              <option value="WhatsApp Farmer Bot">WhatsApp Farmer Bot</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><span data-i18n="grievance_stmt_label">Farmer Grievance Statement</span> <span class="text-danger">*</span></label>
+            <textarea id="newDisputeDetails" class="form-control" rows="3" placeholder="Describe the farmer's complaint and claim..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelNewDispute" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-primary" id="btnSubmitNewDispute" data-i18n="btn_submit_dispute">Create Dispute Case & Hold Payout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 5: Operator Review Note Modal -->
+    <div class="modal-overlay" id="opReviewModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title" id="opReviewModalTitle">Update Operator Oversight Status</h2>
+            <p class="modal-sub">Audit trail will record your identity, timestamp, and rationale.</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseOpReviewModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>New Oversight Status</label>
+            <select id="opReviewNewStatus" class="form-control">
+              <option value="UNDER_REVIEW">Under Formal Investigation</option>
+              <option value="ESCALATED">Escalated to Vigilance / State HQ</option>
+              <option value="CLEARED">Cleared (False Positive / Quality Normal)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><span data-i18n="rationale_label">Oversight Rationale / Action Taken</span> <span class="text-danger">*</span></label>
+            <textarea id="opReviewNote" class="form-control" rows="3" placeholder="Enter findings, physical spot check notes, or formal notice issued..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelOpReview" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-primary" id="btnSaveOpReview" data-i18n="btn_save_status">Save Audit Status</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 6: Publish Rate Card Modal -->
+    <div class="modal-overlay" id="newRateModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title" data-i18n="publish_rate_title">Publish New Rate Card Version</h2>
+            <p class="modal-sub">Versioned pricing configuration. Historical settled runs remain unchanged.</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseNewRateModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>New Version Tag</label>
+            <input type="text" id="newRateVersion" class="form-control" value="v2.4 (Effective 01 Oct 2026)">
+          </div>
+          <div class="rates-input-grid">
+            <div class="form-group">
+              <label>Grade A Rate (₹/kg)</label>
+              <input type="number" id="newRateA" class="form-control" value="30.00" step="0.50">
+            </div>
+            <div class="form-group">
+              <label>Grade B Rate (₹/kg)</label>
+              <input type="number" id="newRateB" class="form-control" value="22.50" step="0.50">
+            </div>
+            <div class="form-group">
+              <label>Grade C Rate (₹/kg)</label>
+              <input type="number" id="newRateC" class="form-control" value="15.00" step="0.50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Executive Memo / Reference</label>
+            <textarea id="newRateMemo" class="form-control" rows="2" placeholder="e.g. Revised minimum support price revision by Mandi Agri Board..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelNewRate" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-primary" id="btnSubmitNewRate" data-i18n="btn_publish_apply">Publish & Apply Rate Card</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 7: Notifications & Alerts Drawer -->
+    <div class="modal-overlay" id="notificationsModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title">System Alerts & Notifications</h2>
+            <p class="modal-sub">Real-time alerts across Mandi ledger, telemetry, and fraud engine</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseNotifsModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="notifsListContainer" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="background:var(--bg-surface-secondary); border-left:3px solid #ef4444; border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted);">
+                <strong style="color:#ef4444;">HIGH ANOMALY DETECTED</strong>
+                <span>10 mins ago</span>
+              </div>
+              <div style="font-size:13.5px; font-weight:700; color:var(--text-primary); margin:4px 0 2px;">Operator Sachin Kale (OP-4092) Flagged</div>
+              <p style="font-size:12.5px; color:var(--text-muted); margin:0;">Grade C produce recorded at +2.8σ deviation from regional benchmark at Dindori Center.</p>
+            </div>
+
+            <div style="background:var(--bg-surface-secondary); border-left:3px solid #f97316; border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted);">
+                <strong style="color:#f97316;">NEW FARMER DISPUTE</strong>
+                <span>24 mins ago</span>
+              </div>
+              <div style="font-size:13.5px; font-weight:700; color:var(--text-primary); margin:4px 0 2px;">Farmer Suresh Deshmukh (FMR-1044)</div>
+              <p style="font-size:12.5px; color:var(--text-muted); margin:0;">Claimed Grade A for Soybean lot. ₹2,940 placed on hold pending photo adjudication.</p>
+            </div>
+
+            <div style="background:var(--bg-surface-secondary); border-left:3px solid #22c55e; border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted);">
+                <strong style="color:#22c55e;">PAYOUT RUN READY</strong>
+                <span>1 hour ago</span>
+              </div>
+              <div style="font-size:13.5px; font-weight:700; color:var(--text-primary); margin:4px 0 2px;">September Batch #BATCH-2026-09-SEP</div>
+              <p style="font-size:12.5px; color:var(--text-muted); margin:0;">24 beneficiary accounts validated. Gross payable: ₹4,29,490.00 ready for dual sign-off.</p>
+            </div>
+
+            <div style="background:var(--bg-surface-secondary); border-left:3px solid #38bdf8; border-radius:10px; padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted);">
+                <strong style="color:#38bdf8;">RATE CARD ACTIVE</strong>
+                <span>Today, 06:00 AM</span>
+              </div>
+              <div style="font-size:13.5px; font-weight:700; color:var(--text-primary); margin:4px 0 2px;">Rate Card v2.3 Locked</div>
+              <p style="font-size:12.5px; color:var(--text-muted); margin:0;">Standard rates: Grade A ₹28/kg, Grade B ₹21/kg, Grade C ₹14/kg applied cluster-wide.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnDismissNotifs">Close</button>
+          <button class="btn btn-primary" id="btnMarkAllNotifsRead">Mark All as Read</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 8: Admin Profile & Credentials Modal -->
+    <div class="modal-overlay" id="profileModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <h2 class="modal-title">FPO Administrator Credentials</h2>
+            <p class="modal-sub">Cryptographic keys, cluster delegation & security protocol</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseProfileModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-color);">
+            <div style="width:54px; height:54px; border-radius:50%; background:#93c5fd; color:#1e3a8a; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center;">AK</div>
+            <div>
+              <h3 style="font-size:17px; font-weight:800; color:var(--text-primary); margin:0;">Anita Kapoor</h3>
+              <p style="font-size:13px; color:var(--primary); font-weight:600; margin:2px 0 0;">Principal FPO Administrator (ADM-4092)</p>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px; margin-bottom:16px;">
+            <div style="background:var(--bg-surface-secondary); padding:10px 14px; border-radius:8px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Assigned Cluster</span>
+              <strong style="color:var(--text-primary);">Ratlam Central APMC</strong>
+            </div>
+            <div style="background:var(--bg-surface-secondary); padding:10px 14px; border-radius:8px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Authorization Level</span>
+              <strong style="color:var(--primary);">Tier-1 Root Signing Authority</strong>
+            </div>
+            <div style="background:var(--bg-surface-secondary); padding:10px 14px; border-radius:8px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Hardware Security Module</span>
+              <strong style="color:var(--text-primary);">YubiKey HSM v5.4</strong>
+            </div>
+            <div style="background:var(--bg-surface-secondary); padding:10px 14px; border-radius:8px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Session Key Integrity</span>
+              <strong style="color:#22c55e;">100% Cryptographically Sealed</strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Public Merkle Master Key (ED25519)</label>
+            <input type="text" class="form-control" value="0x7fa2c091e8b417d98342019ff482ac1983eb0c44" readonly style="font-family:var(--font-mono); font-size:12px;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCloseProfileModalBtn">Close</button>
+          <button class="btn btn-primary" id="btnExportAdminKey">Export Admin Certificate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 9: Merkle Root Verification Certificate Modal -->
+    <div class="modal-overlay" id="merkleVerifyModal">
+      <div class="modal-dialog modal-md">
+        <div class="modal-header">
+          <div class="mh-title-wrap">
+            <div class="modal-badge-green">CRYPTOGRAPHIC INTEGRITY PROOF</div>
+            <h2 class="modal-title">Merkle Tree Verification</h2>
+            <p class="modal-sub">Zero-knowledge proof verification across all locked weighbridge passes</p>
+          </div>
+          <button class="modal-close-btn" id="btnCloseMerkleModal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="text-align:center; padding:16px 0;">
+            <div style="width:64px; height:64px; border-radius:50%; background:rgba(34,197,94,0.15); color:#22c55e; display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:32px; height:32px;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h3 style="font-size:18px; font-weight:800; color:var(--text-primary); margin:0 0 4px;">100% Valid & Untampered</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin:0;">Every weighbridge ticket hash is mathematically reconciled against the root block.</p>
+          </div>
+
+          <div style="background:var(--bg-surface-secondary); border:1px solid var(--border-color); border-radius:10px; padding:14px; margin-bottom:16px; font-size:12.5px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--text-muted);">Root Merkle Hash:</span>
+              <span style="font-family:var(--font-mono); font-weight:700; color:var(--primary);">0x9e8a...ff48</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--text-muted);">Verified Leaf Nodes:</span>
+              <strong style="color:var(--text-primary);">1,842 Transactions</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+              <span style="color:var(--text-muted);">Algorithm:</span>
+              <strong style="color:var(--text-primary);">SHA-256 + HMAC-256</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Tamper Anomaly Count:</span>
+              <strong style="color:#22c55e;">0 (Zero Discrepancies)</strong>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCloseMerkleModalBtn">Close</button>
+          <button class="btn btn-primary" id="btnDownloadMerkleCert">Download PDF Certificate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
