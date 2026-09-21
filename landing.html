@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FPO Ledger — Verified Agricultural Collection & Grading</title>
+  <meta name="description" content="FPO Ledger creates a transparent digital record for agricultural collection, grading and farmer approval. Enter the Admin Portal to manage your FPO operations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="auth.js"></script>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #06150d;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Hero Section ──────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(
+          160deg,
+          rgba(5, 30, 16, 0.82) 0%,
+          rgba(9, 40, 26, 0.75) 40%,
+          rgba(15, 55, 32, 0.68) 100%
+        ),
+        url('hero.jpg') center center / cover no-repeat;
+    }
+
+    /* ── Navbar ────────────────────────────────────────────────────────────── */
+    .hero-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(22, 163, 74, 0.25);
+      border: 2px solid rgba(134, 239, 172, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-logo-circle svg {
+      width: 22px;
+      height: 22px;
+      color: #86efac;
+      stroke: currentColor;
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .nav-signin-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      background: rgba(22, 163, 74, 0.18);
+      border: 1.5px solid rgba(134, 239, 172, 0.35);
+      color: #d1fae5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-signin-btn:hover {
+      background: rgba(22, 163, 74, 0.32);
+      border-color: rgba(134, 239, 172, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* ── Hero Content ──────────────────────────────────────────────────────── */
+    .hero-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px 80px;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Badge pill */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      border-radius: 9999px;
+      background: rgba(22, 163, 74, 0.2);
+      border: 1px solid rgba(134, 239, 172, 0.3);
+      backdrop-filter: blur(12px);
+      color: #86efac;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeSlideDown 0.6s ease both;
+    }
+
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Headline */
+    .hero-headline {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.08;
+      color: #fff;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      max-width: 780px;
+      animation: fadeSlideDown 0.6s 0.1s ease both;
+    }
+
+    .hero-headline span {
+      background: linear-gradient(135deg, #4ade80 0%, #86efac 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Supporting text */
+    .hero-subtext {
+      font-size: clamp(15px, 2vw, 18px);
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.65;
+      max-width: 560px;
+      margin-bottom: 44px;
+      font-weight: 400;
+      animation: fadeSlideDown 0.6s 0.2s ease both;
+    }
+
+    /* CTA buttons */
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeSlideDown 0.6s 0.3s ease both;
+    }
+
+    .btn-primary-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 32px;
+      border-radius: 9999px;
+      background: #fff;
+      color: #09281a;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      letter-spacing: -0.1px;
+    }
+
+    .btn-primary-hero:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+      background: #f0fdf4;
+    }
+
+    .btn-primary-hero svg {
+      width: 18px;
+      height: 18px;
+      stroke: #09281a;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary-hero:hover svg {
+      transform: translateX(4px);
+    }
+
+    .btn-secondary-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 15px 32px;
+      border-radius: 9999px;
+      background: rgba(22, 163, 74, 0.15);
+      border: 1.5px solid rgba(134, 239, 172, 0.4);
+      color: #d1fae5;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      backdrop-filter: blur(12px);
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-secondary-hero:hover {
+      background: rgba(22, 163, 74, 0.28);
+      border-color: rgba(134, 239, 172, 0.65);
+      transform: translateY(-2px);
+    }
+
+    /* scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.45);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: fadeSlideDown 0.6s 0.5s ease both, bounce 2s 1.5s ease-in-out infinite;
+    }
+
+    .scroll-indicator svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+
+    /* ── Features Section ──────────────────────────────────────────────────── */
+    #features {
+      background: #f5f7f2;
+      padding: 100px 24px;
+    }
+
+    .features-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .features-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #16a34a;
+      margin-bottom: 14px;
+    }
+
+    .features-heading {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(26px, 4vw, 40px);
+      color: #09281a;
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .features-subtext {
+      text-align: center;
+      color: #4b5563;
+      font-size: 16px;
+      max-width: 520px;
+      margin: 0 auto 60px;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid #e5e9e6;
+      border-radius: 20px;
+      padding: 36px 32px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #16a34a, #4ade80);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(9, 40, 26, 0.1);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #eaf7ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: #16a34a;
+    }
+
+    .feature-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #09281a;
+      margin-bottom: 10px;
+      letter-spacing: -0.2px;
+    }
+
+    .feature-desc {
+      font-size: 14.5px;
+      color: #6b7280;
+      line-height: 1.65;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────────── */
+    .landing-footer {
+      background: #06150d;
+      padding: 36px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-brand-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(22, 163, 74, 0.2);
+      border: 1.5px solid rgba(134, 239, 172, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-brand-circle svg {
+      width: 16px;
+      height: 16px;
+      stroke: #86efac;
+    }
+
+    .footer-brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .footer-right {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ── Animations ────────────────────────────────────────────────────────── */
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── Responsive ────────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-nav {
+        padding: 20px 24px;
+      }
+      .hero-ctas {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-primary-hero,
+      .btn-secondary-hero {
+        justify-content: center;
+      }
+      .landing-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 28px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       HERO SECTION
+  ════════════════════════════════════════════════════════════════════════ -->
+  <section class="hero" aria-label="FPO Ledger hero">
+
+    <!-- Navbar -->
+    <nav class="hero-nav" role="navigation" aria-label="Main navigation">
+      <a href="landing.html" class="brand" aria-label="FPO Ledger home">
+        <div class="brand-logo-circle" aria-hidden="true">
+          <!-- Sprout / leaf icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 20h10"/>
+            <path d="M10 20c0-4 1-7 2-9"/>
+            <path d="M12 11c1.5-2.5 4.5-3.5 7-3-1 3-3.5 5.5-7 5.5"/>
+            <path d="M12 11c-1.5-2-4-2.5-6-2 .5 2.5 2.5 4.5 6 5"/>
+          </svg>
+        </div>
+        <span class="brand-name">FPO Ledger</span>
+      </a>
+
+      <a href="login.html" class="nav-signin-btn" id="navSignInBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Admin sign in
+      </a>
+    </nav>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+
+      <!-- Badge -->
+      <div class="hero-badge" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+        Collection &nbsp;·&nbsp; Grading &nbsp;·&nbsp; Farmer Approval
+      </div>
+
+      <!-- Headline -->
+      <h1 class="hero-headline">
+        Every Crop. Every Grade.<br>
+        <span>Verified.</span>
+      </h1>
+
+      <!-- Subtext -->
+      <p class="hero-subtext">
+        FPO Ledger creates a transparent digital record for agricultural collection, grading and farmer approval.
+      </p>
+
+      <!-- CTAs -->
+      <div class="hero-ctas">
+        <a href="login.html" class="btn-primary-hero" id="heroEnterPortalBtn">
+          Enter Admin Portal
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+        <a href="#features" class="btn-secondary-hero" id="heroHowItWorksBtn">
+          How It Works
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="scroll-indicator" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       FEATURES SECTION
+  ════════════════════════════════════════════════════════════════════════ -->
+  <section id="features" aria-label="How FPO Ledger works">
+    <div class="features-inner">
+
+      <p class="features-label">How It Works</p>
+      <h2 class="features-heading">From Field to Verified Record</h2>
+      <p class="features-subtext">
+        Every step in the agricultural supply chain is captured, graded, and approved — creating an immutable digital trail.
+      </p>
+
+      <div class="features-grid">
+
+        <!-- Card 1: Collection -->
+        <div class="feature-card" role="article">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- Truck/collection icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"/>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Collection</h3>
+          <p class="feature-desc">
+            Digital weighbridge passes are issued at every mandi collection point. Gross weight, tare weight, and moisture content are captured and cryptographically locked in real time.
+          </p>
+        </div>
+
+        <!-- Card 2: Grading -->
+        <div class="feature-card" role="article">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- Star/grade icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Grading</h3>
+          <p class="feature-desc">
+            Produce is graded A, B, or C by certified field operators. Photo evidence is attached, and statistical anomaly detection flags outliers automatically — preventing grade manipulation.
+          </p>
+        </div>
+
+        <!-- Card 3: Farmer Approval -->
+        <div class="feature-card" role="article">
+          <div class="feature-icon" aria-hidden="true">
+            <!-- User-check icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+              <polyline points="16 11 17.5 12.5 21 9"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Farmer Approval</h3>
+          <p class="feature-desc">
+            Farmers receive transparent payout summaries tied to verified weights and grades. Disputes are resolved through evidence-based adjudication with append-only correction records.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════════════ -->
+  <footer class="landing-footer" role="contentinfo">
+    <div class="footer-brand">
+      <div class="footer-brand-circle" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 20h10"/>
+          <path d="M10 20c0-4 1-7 2-9"/>
+          <path d="M12 11c1.5-2.5 4.5-3.5 7-3-1 3-3.5 5.5-7 5.5"/>
+          <path d="M12 11c-1.5-2-4-2.5-6-2 .5 2.5 2.5 4.5 6 5"/>
+        </svg>
+      </div>
+      <span class="footer-brand-name">FPO Ledger</span>
+    </div>
+    <span class="footer-right">© 2026 FPO Ledger. All rights reserved.</span>
+  </footer>
+
+  <script>
+    // Redirect to dashboard if already logged in
+    AgriAuth.redirectIfLoggedIn('index.html');
+  </script>
+</body>
+</html>
