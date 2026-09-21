@@ -1040,6 +1040,14 @@ function switchTab(tabId) {
     pane.classList.toggle('active', pane.id === `tab-${tabId}`);
   });
 
+  // Automatically close mobile sidebar drawer on tab switch
+  if (window.innerWidth <= 992) {
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+  }
+
   if (tabId === 'deliveries') renderDeliveryCards();
   if (tabId === 'ledger') renderLedgerTable();
   if (tabId === 'fraud') renderOperatorRiskCards();
@@ -1051,10 +1059,23 @@ function switchTab(tabId) {
 function setupSidebarToggle() {
   const btn = document.getElementById('sidebarToggleBtn');
   const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
 
   if (btn && sidebar) {
     btn.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
+      if (window.innerWidth <= 992) {
+        sidebar.classList.toggle('mobile-open');
+        if (backdrop) backdrop.classList.toggle('active', sidebar.classList.contains('mobile-open'));
+      } else {
+        sidebar.classList.toggle('collapsed');
+      }
+    });
+  }
+
+  if (backdrop && sidebar) {
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('mobile-open');
+      backdrop.classList.remove('active');
     });
   }
 }

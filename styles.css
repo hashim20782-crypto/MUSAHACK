@@ -2181,3 +2181,310 @@ body {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   Mobile Backdrop & Responsive Adaptations
+   ========================================================================== */
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 850;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile Sidebar Drawer on Tablet and Phone (< 992px) */
+@media (max-width: 992px) {
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 900;
+    transform: translateX(-100%);
+    box-shadow: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 36px rgba(0, 0, 0, 0.6);
+  }
+
+  .app-sidebar.collapsed {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+
+  .app-sidebar.collapsed.mobile-open {
+    transform: translateX(0);
+  }
+
+  .app-sidebar.collapsed .brand-text-block,
+  .app-sidebar.collapsed .nav-label,
+  .app-sidebar.collapsed .nav-count-badge,
+  .app-sidebar.collapsed .nav-badge,
+  .app-sidebar.collapsed .nav-section-heading,
+  .app-sidebar.collapsed .sidebar-footer {
+    display: flex !important;
+  }
+}
+
+/* Standard Tablet & Phone Breakpoints (< 768px) */
+@media (max-width: 768px) {
+  .app-header {
+    height: 60px;
+    padding: 0 12px;
+  }
+
+  .header-search-wrap {
+    display: none;
+  }
+
+  .header-left {
+    gap: 10px;
+  }
+
+  .header-right-controls {
+    gap: 8px;
+  }
+
+  .app-main-content {
+    padding: 16px 12px;
+  }
+
+  .hero-page-title {
+    font-size: 22px;
+  }
+
+  .hero-page-subtitle {
+    font-size: 13px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .page-intro-header-row,
+  .page-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .page-topbar-actions,
+  .page-intro-right-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .page-topbar-actions .btn,
+  .page-intro-right-actions .btn,
+  .btn-cyan-report {
+    flex: 1;
+    min-width: 130px;
+    justify-content: center;
+  }
+
+  .delivery-metrics-grid,
+  .rates-display-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .passes-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .pass-card {
+    padding: 16px;
+  }
+
+  .overview-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dash-quick-links {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pulse-card {
+    padding: 16px;
+  }
+
+  .pulse-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filter-toolbar {
+    padding: 12px;
+  }
+
+  .filter-selects-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .anomaly-dashboard-layout,
+  .disputes-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .benchmark-banner,
+  .quarantine-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .bb-left, .qb-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .bb-pills {
+    flex-wrap: wrap;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+
+  .data-table {
+    min-width: 680px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-dialog {
+    width: 96%;
+    max-height: 92vh;
+    margin: 8px auto;
+    border-radius: 16px;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 14px 16px;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    min-width: 110px;
+    justify-content: center;
+  }
+}
+
+/* Compact Mobile (< 520px) */
+@media (max-width: 520px) {
+  .operator-meta-pill {
+    display: none;
+  }
+
+  .user-info-text {
+    display: none;
+  }
+
+  .user-profile-header-chip {
+    padding: 3px;
+  }
+
+  .online-text {
+    display: none;
+  }
+
+  .online-status-badge {
+    padding: 6px 8px;
+  }
+
+  .lang-toggle-btn {
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .overview-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .om-val {
+    font-size: 26px;
+  }
+
+  .pass-stats-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .pass-stats-strip .pass-stat-col:last-child {
+    grid-column: span 2;
+  }
+
+  .pass-actions-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .receipt-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .toast {
+    font-size: 12.5px;
+    padding: 10px 14px;
+  }
+}
+

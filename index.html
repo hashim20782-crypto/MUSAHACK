@@ -9,6 +9,47 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Auth utility — must load before app.js -->
+  <script src="auth.js"></script>
+  <script>
+    // Redirect to login if not authenticated (runs synchronously before body renders)
+    AgriAuth.protectRoute();
+  </script>
+  <style>
+    /* Logout button styles */
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border-radius: 9999px;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1.5px solid rgba(220, 38, 38, 0.25);
+      color: #fca5a5;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .logout-btn:hover {
+      background: rgba(220, 38, 38, 0.2);
+      border-color: rgba(220, 38, 38, 0.45);
+      transform: translateY(-1px);
+    }
+    [data-theme="light"] .logout-btn {
+      color: #b91c1c;
+      background: rgba(220, 38, 38, 0.07);
+      border-color: rgba(220, 38, 38, 0.2);
+    }
+    .logout-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+  </style>
 </head>
 <body>
   <div id="app" class="app-layout">
@@ -103,6 +144,22 @@
             <span class="user-role-sub" id="headerUserRoleTitle">Principal Admin</span>
           </div>
         </div>
+
+        <!-- Logout Button -->
+        <button
+          id="logoutBtn"
+          class="logout-btn"
+          title="Sign out and return to home"
+          aria-label="Log out"
+          onclick="AgriAuth.signOut('landing.html')"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </button>
       </div>
     </header>
 
@@ -228,6 +285,8 @@
           </div>
         </div>
       </aside>
+      <!-- Mobile sidebar backdrop overlay -->
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
       <!-- Main Dynamic Content Workspace -->
       <main class="app-main-content">
