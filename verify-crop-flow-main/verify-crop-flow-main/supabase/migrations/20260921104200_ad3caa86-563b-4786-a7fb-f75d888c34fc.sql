@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.handle_new_operator() FROM PUBLIC, anon, authenticated;
