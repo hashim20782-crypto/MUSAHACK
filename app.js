@@ -721,6 +721,217 @@ const APP_STATE = {
 // 3. UI Initialization & Setup
 // ============================================================================
 
+async function syncWithSupabase() {
+  const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (!client || window.SUPABASE_CONFIG?.url?.includes('xyzcompanyagritech')) {
+    console.log('[Supabase Admin] Running with demo / cached dataset.');
+    return;
+  }
+
+  try {
+    // 1. Fetch current admin user and update header
+    if (window.AgriAuth?.getCurrentUser) {
+      const userSession = await AgriAuth.getCurrentUser();
+      if (userSession) {
+        const nameEl = document.querySelector('.user-name');
+        if (nameEl) nameEl.textContent = userSession.name;
+        const roleEl = document.querySelector('.user-role');
+        if (roleEl) roleEl.textContent = `Admin (${userSession.email})`;
+      }
+    }
+
+    // 2. Fetch live transactions from Supabase
+    const { data: txns, error: txnErr } = await client
+      .from('transactions')
+      .select(`
+        id,
+        transaction_number,
+        status,
+        declared_weight,
+        actual_weight,
+        quality_grade,
+        unit,
+        rate_per_kg,
+        total_payout,
+        hash_sha256,
+        photo_url,
+        notes,
+        submitted_at,
+        created_at,
+        farmers (
+          farmer_code,
+          village,
+          district,
+          profiles (full_name, phone)
+        ),
+        mandis (name, code),
+        produce (name, category),
+        operators (
+          operator_code,
+          profiles (full_name)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (!txnErr && txns && txns.length > 0) {
+      console.log(`[Supabase Admin] Successfully loaded ${txns.length} transactions.`);
+      
+      const livePasses = txns.map(t => {
+        const farmerName = t.farmers?.profiles?.full_name || 'Farmer Member';
+        const farmerCode = t.farmers?.farmer_code || 'FMR-000';
+        const opName = t.operators?.profiles?.full_name || 'Operator';
+        const opCode = t.operators?.operator_code || 'OP-000';
+        const produceName = t.produce?.name || 'Produce Lot';
+        const wt = Number(t.actual_weight || t.declared_weight || 0);
+        const rate = Number(t.rate_per_kg || 28.00);
+        const amt = Number(t.total_payout || (wt * rate));
+        const isLocked = t.status === 'verified' || t.status === 'completed';
+
+        return {
+          id: t.transaction_number || t.id.substring(0, 8),
+          dbId: t.id,
+          produceEn: produceName,
+          produceHi: produceName,
+          dateEn: new Date(t.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+          dateHi: new Date(t.created_at).toLocaleDateString('hi-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+          netWeight: `${wt} kg`,
+          weightKg: wt,
+          grade: t.quality_grade || 'A',
+          hash: t.hash_sha256 ? `${t.hash_sha256.substring(0, 4)}...${t.hash_sha256.substring(t.hash_sha256.length - 4)}` : '9a3b...ea44',
+          fullHash: t.hash_sha256 || '9a3bc481f90e821fa7e44b9102c918a',
+          status: isLocked ? 'LOCKED' : 'PENDING',
+          grossWeight: `${wt + 3200} kg`,
+          tareWeight: '3,200 kg',
+          vehicleNo: 'MP-43-AGRI',
+          moisture: '11.0%',
+          ratePerKg: rate,
+          totalAmount: amt,
+          operatorName: `${opName} (${opCode})`,
+          farmerName: `${farmerName} (${farmerCode})`,
+          center: t.mandis?.name || 'Ratlam Main Mandi'
+        };
+      });
+
+      APP_STATE.deliveryPasses = livePasses;
+      renderDeliveryCards();
+
+      const liveLedger = txns.map(t => {
+        const farmerName = t.farmers?.profiles?.full_name || 'Farmer Member';
+        const farmerCode = t.farmers?.farmer_code || 'FMR-000';
+        const opName = t.operators?.profiles?.full_name || 'Operator';
+        const opCode = t.operators?.operator_code || 'OP-000';
+        const wt = Number(t.actual_weight || t.declared_weight || 0);
+        const rate = Number(t.rate_per_kg || 28.00);
+        const amt = Number(t.total_payout || (wt * rate));
+
+        return {
+          id: t.transaction_number || t.id.substring(0, 8),
+          dbId: t.id,
+          timestamp: new Date(t.created_at).toLocaleString('en-GB'),
+          farmerId: farmerCode,
+          farmerName: farmerName,
+          village: t.farmers?.village || 'Ratlam',
+          operatorId: opCode,
+          operatorName: opName,
+          center: t.mandis?.name || 'Ratlam Mandi',
+          produce: t.produce?.name || 'Wheat',
+          grade: t.quality_grade || 'A',
+          weightKg: wt,
+          ratePerKg: rate,
+          computedAmount: amt,
+          status: t.status === 'verified' || t.status === 'completed' ? 'LOCKED' : 'PENDING',
+          merkleHash: t.hash_sha256 ? t.hash_sha256.substring(0, 16) : '0x9e8a71b42cd09341',
+          hasDispute: t.status === 'rejected',
+          quarantine: false
+        };
+      });
+
+      APP_STATE.ledgerEntries = liveLedger;
+      renderLedgerTable();
+    }
+
+    // 3. Fetch live disputes from Supabase
+    const { data: disps, error: dispErr } = await client
+      .from('disputes')
+      .select(`
+        id,
+        dispute_code,
+        issue_type,
+        description,
+        status,
+        created_at,
+        transactions (
+          id,
+          transaction_number,
+          actual_weight,
+          declared_weight,
+          quality_grade,
+          produce (name)
+        ),
+        farmers (
+          farmer_code,
+          profiles (full_name)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (!dispErr && disps && disps.length > 0) {
+      console.log(`[Supabase Admin] Successfully loaded ${disps.length} disputes.`);
+      APP_STATE.disputes = disps.map(d => ({
+        id: d.dispute_code || `DSP-${d.id.substring(0, 6)}`,
+        dbId: d.id,
+        entryId: d.transactions?.transaction_number || 'TXN-001',
+        farmerName: d.farmers?.profiles?.full_name || 'Farmer',
+        farmerId: d.farmers?.farmer_code || 'FMR-001',
+        produce: d.transactions?.produce?.name || 'Produce',
+        grievance: d.description || d.issue_type,
+        assignedGrade: d.transactions?.quality_grade || 'C',
+        claimedGrade: 'A',
+        holdAmount: (d.transactions?.actual_weight || d.transactions?.declared_weight || 100) * 28,
+        potentialAmount: (d.transactions?.actual_weight || d.transactions?.declared_weight || 100) * 34,
+        status: d.status === 'resolved' ? 'RESOLVED & CORRECTED' : (d.status === 'reviewing' ? 'REVIEWING' : 'OPEN CLAIM'),
+        channel: 'Farmer App Portal'
+      }));
+      renderDisputeList();
+      renderDisputeWorkbench(APP_STATE.disputes[0]?.id);
+    }
+
+    // 4. Fetch live audit logs from Supabase
+    const { data: logs, error: logErr } = await client
+      .from('audit_logs')
+      .select('*, profiles(full_name, role)')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (!logErr && logs && logs.length > 0) {
+      APP_STATE.auditLog = logs.map(l => ({
+        timestamp: new Date(l.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        actor: l.profiles?.full_name ? `${l.profiles.full_name} (${l.profiles.role})` : 'System Engine',
+        desc: `${l.action}: ${l.entity_type} ${l.entity_id ? `[${l.entity_id.substring(0, 8)}]` : ''}`
+      }));
+      renderAuditTimeline();
+    }
+
+    // 5. Setup Realtime subscription
+    if (!window.__REALTIME_CHANNEL_ACTIVE__) {
+      window.__REALTIME_CHANNEL_ACTIVE__ = true;
+      client.channel('admin-realtime-stream')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, (payload) => {
+          console.log('[Supabase Admin Realtime] Transaction change detected:', payload);
+          showToast(`⚡ Realtime: Transaction status changed.`, 'info');
+          syncWithSupabase();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'disputes' }, (payload) => {
+          showToast('⚡ Realtime: Farmer dispute updated.', 'info');
+          syncWithSupabase();
+        })
+        .subscribe();
+    }
+  } catch (err) {
+    console.error('[Supabase Admin] Exception during syncWithSupabase:', err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check persisted language preference
   const savedLang = localStorage.getItem('fpo_lang');
@@ -761,6 +972,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupModals();
   setupThemeToggle();
   setupIntegrityVerification();
+
+  // Connect & Sync with Supabase
+  syncWithSupabase();
 
   showToast(APP_STATE.currentLang === 'hi' ? 'एफपीओ लेजर सिस्टम तैयार है।' : 'FPO Ledger System ready. Tamper-proof weighbridge active.', 'success');
 });
@@ -1498,7 +1712,7 @@ function setupModals() {
   if (closeRate) closeRate.onclick = () => document.getElementById('newRateModal').classList.remove('open');
   if (cancelRate) cancelRate.onclick = () => document.getElementById('newRateModal').classList.remove('open');
   if (submitRate) {
-    submitRate.onclick = () => {
+    submitRate.onclick = async () => {
       const version = document.getElementById('newRateVersion').value || 'v2.4';
       const rateA = parseFloat(document.getElementById('newRateA').value) || 30;
       const rateB = parseFloat(document.getElementById('newRateB').value) || 22.5;
@@ -1513,6 +1727,23 @@ function setupModals() {
         rates: { A: rateA, B: rateB, C: rateC },
         memo: memo
       });
+
+      // Persist to Supabase
+      const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (client && !window.SUPABASE_CONFIG?.url?.includes('xyzcompanyagritech')) {
+        try {
+          await client.from('rate_cards').insert({
+            produce_name: 'Wheat & Soybean Blend',
+            grade_a_rate: rateA,
+            grade_b_rate: rateB,
+            grade_c_rate: rateC,
+            version: version,
+            active: true
+          });
+        } catch (e) {
+          console.warn('[Supabase Admin] Error publishing rate card:', e);
+        }
+      }
 
       APP_STATE.auditLog.unshift({
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
@@ -1949,7 +2180,7 @@ function renderDisputeWorkbench(dspId) {
 
   const btnAccept = document.getElementById('btnAcceptFarmerClaim');
   if (btnAccept) {
-    btnAccept.onclick = () => {
+    btnAccept.onclick = async () => {
       dsp.status = 'RESOLVED (ACCEPTED)';
       const entry = APP_STATE.ledgerEntries.find(e => e.id === dsp.entryId);
       if (entry) {
@@ -1957,6 +2188,21 @@ function renderDisputeWorkbench(dspId) {
         entry.status = 'LOCKED (CORRECTED)';
         entry.computedAmount = dsp.potentialAmount;
       }
+
+      // Persist to Supabase if connected
+      const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (client && dsp.dbId) {
+        try {
+          await client.from('disputes').update({
+            status: 'resolved',
+            admin_confirmed: true,
+            resolution_notes: `Accepted farmer claim: Upgraded to Grade ${dsp.claimedGrade}`
+          }).eq('id', dsp.dbId);
+        } catch (e) {
+          console.warn('[Supabase Admin] Error updating dispute:', e);
+        }
+      }
+
       APP_STATE.auditLog.unshift({
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
         actor: 'Anita Kapoor (FPO Admin)',
@@ -1972,8 +2218,23 @@ function renderDisputeWorkbench(dspId) {
 
   const btnReject = document.getElementById('btnRejectDispute');
   if (btnReject) {
-    btnReject.onclick = () => {
+    btnReject.onclick = async () => {
       dsp.status = 'RESOLVED (REJECTED)';
+
+      // Persist to Supabase if connected
+      const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+      if (client && dsp.dbId) {
+        try {
+          await client.from('disputes').update({
+            status: 'rejected',
+            admin_confirmed: false,
+            resolution_notes: 'Original grading upheld by committee'
+          }).eq('id', dsp.dbId);
+        } catch (e) {
+          console.warn('[Supabase Admin] Error rejecting dispute:', e);
+        }
+      }
+
       APP_STATE.auditLog.unshift({
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
         actor: 'Anita Kapoor (FPO Admin)',
