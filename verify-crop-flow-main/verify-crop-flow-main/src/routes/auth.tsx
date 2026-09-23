@@ -68,7 +68,7 @@ function AuthPage() {
           password,
           options: {
             data: { name: name || "Rahul Patil", role: "operator" },
-            emailRedirectTo: ${window.location.origin}/dashboard,
+            emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
           },
         });
 
