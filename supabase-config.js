@@ -2,15 +2,13 @@
  * Supabase Global Configuration & Client Initializer (Vanilla JS & HTML Frontends)
  * ---------------------------------------------------------------------------------
  * Shared across FARMER, OPERATOR, and ADMIN branches.
- * 
- * You can set window.__ENV__ or update the fallback constants with your Supabase credentials.
  */
 
 (function () {
   'use strict';
 
-  const DEFAULT_SUPABASE_URL = 'https://xyzcompanyagritech.supabase.co';
-  const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5emNvbXBhbnlhZ3JpdGVjaCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjIwMDAwMDAwMDB9.placeholder';
+  const DEFAULT_SUPABASE_URL = 'https://uujklkizvjtvqrzygnsa.supabase.co';
+  const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1amtsa2l6dmp0dnFyenlnbnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNTU5MjMsImV4cCI6MjEwNTczMTkyM30.MwDzGnJTxQv3f8az5JIOyendzNkzrbtC4avhjynjFDk';
 
   const url = (window.__ENV__ && window.__ENV__.SUPABASE_URL) 
     || localStorage.getItem('SUPABASE_URL') 
