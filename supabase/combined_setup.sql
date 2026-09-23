@@ -91,12 +91,14 @@ CREATE TABLE IF NOT EXISTS public.farmers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Add any missing columns to farmers if it already existed
+-- Add any missing columns & drop NOT NULL constraints for seed compatibility
 ALTER TABLE public.farmers ADD COLUMN IF NOT EXISTS fpo_id TEXT;
 ALTER TABLE public.farmers ADD COLUMN IF NOT EXISTS name TEXT;
 ALTER TABLE public.farmers ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE public.farmers ADD COLUMN IF NOT EXISTS village TEXT;
 ALTER TABLE public.farmers ADD COLUMN IF NOT EXISTS qr_identifier TEXT;
+ALTER TABLE public.farmers ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE public.farmers ALTER COLUMN farmer_code DROP NOT NULL;
 
 -- 6. Operators Table
 CREATE TABLE IF NOT EXISTS public.operators (
@@ -124,6 +126,8 @@ ALTER TABLE public.operators ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE public.operators ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE public.operators ADD COLUMN IF NOT EXISTS language TEXT DEFAULT 'en';
 ALTER TABLE public.operators ADD COLUMN IF NOT EXISTS voice_enabled BOOLEAN DEFAULT true;
+ALTER TABLE public.operators ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE public.operators ALTER COLUMN operator_code DROP NOT NULL;
 
 -- 7. Produce Table
 CREATE TABLE IF NOT EXISTS public.produce (
@@ -212,6 +216,11 @@ ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS dispute_note TEXT;
 ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS sync_status TEXT DEFAULT 'SYNCED';
 ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS offline_created BOOLEAN DEFAULT false;
 ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS is_demo BOOLEAN DEFAULT false;
+
+ALTER TABLE public.transactions ALTER COLUMN farmer_id DROP NOT NULL;
+ALTER TABLE public.transactions ALTER COLUMN mandi_id DROP NOT NULL;
+ALTER TABLE public.transactions ALTER COLUMN transaction_number DROP NOT NULL;
+ALTER TABLE public.transactions ALTER COLUMN declared_weight DROP NOT NULL;
 
 -- 10. Audit Events Table
 CREATE TABLE IF NOT EXISTS public.audit_events (
