@@ -51,28 +51,33 @@ export async function simulateFarmerApproval(
   ];
 
   if (online) {
-    const { error } = await supabase
-      .from("transactions")
-      .update({
-        status: "VERIFIED_LOCKED",
-        approval_method: method,
-        approved_at: now,
-        verified_at: now,
-      })
-      .eq("transaction_id", txn.transaction_id);
-    if (error) throw error;
-    const { data: auth } = await supabase.auth.getUser();
-    await supabase.from("audit_events").insert(
-      events.map((e) => ({
-        transaction_id: e.transaction_id,
-        actor_id: auth.user?.id ?? null,
-        actor_role: e.actor_role,
-        actor_name: e.actor_name ?? null,
-        event_type: e.event_type,
-        metadata: e.metadata ?? {},
-      })),
-    );
-    return { ...locked, sync_status: "SYNCED" };
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          status: "VERIFIED_LOCKED",
+          approval_method: method,
+          approved_at: now,
+          verified_at: now,
+        })
+        .eq("transaction_id", txn.transaction_id);
+      if (!error) {
+        const { data: auth } = await supabase.auth.getUser();
+        await supabase.from("audit_events").insert(
+          events.map((e) => ({
+            transaction_id: e.transaction_id,
+            actor_id: auth?.user?.id ?? null,
+            actor_role: e.actor_role,
+            actor_name: e.actor_name ?? null,
+            event_type: e.event_type,
+            metadata: e.metadata ?? {},
+          })),
+        ).catch(() => {});
+        return { ...locked, sync_status: "SYNCED" };
+      }
+    } catch (err) {
+      console.warn("Online approval error, saving locally:", err);
+    }
   }
 
   const offlineLocked: Transaction = { ...locked, sync_status: "SYNC_PENDING" };

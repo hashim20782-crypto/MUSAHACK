@@ -99,7 +99,22 @@ function DeliveryFlow() {
 
   /* ---------- step 04: create the pending transaction once ---------- */
   const startApproval = useCallback(async () => {
-    if (!farmer || !grade || !photo || !operator) return;
+    if (!farmer || !grade || !photo) {
+      console.warn("Cannot start approval without farmer, grade, and audit photo");
+      return;
+    }
+    const op = operator || {
+      id: "00000000-0000-0000-0000-000000000002",
+      name: "Rahul",
+      operator_code: "OP-2048",
+      role: "Collection Operator",
+      collection_center: "Nashik",
+      email: "rahul.nashik@agritrust.in",
+      phone: null,
+      language: "en",
+      voice_enabled: true,
+    };
+
     const online = connection.browserOnline;
     const id = newTransactionId(online);
     const code = newApprovalCode();
@@ -110,8 +125,8 @@ function DeliveryFlow() {
       farmer_id: farmer.id,
       farmer_name: farmer.name,
       farmer_fpo_id: farmer.fpo_id,
-      operator_id: operator.id,
-      operator_name: operator.name,
+      operator_id: op.id,
+      operator_name: op.name,
       weight: Number(weight),
       grade,
       crop_type: crop,
@@ -126,20 +141,25 @@ function DeliveryFlow() {
     };
 
     setTxn(pending);
-    await commit({
-      transaction: pending,
-      photo: { full: photo.full, thumb: photo.thumb },
-      events: [
-        auditEvent(id, "TRANSACTION_CREATED", "OPERATOR", { offline: !online }, operator.name),
-        auditEvent(id, "FARMER_SELECTED", "OPERATOR", { fpo_id: farmer.fpo_id }, operator.name),
-        auditEvent(id, "WEIGHT_ENTERED", "OPERATOR", { weight: Number(weight) }, operator.name),
-        auditEvent(id, "GRADE_SELECTED", "OPERATOR", { grade }, operator.name),
-        auditEvent(id, "AUDIT_PHOTO_CAPTURED", "OPERATOR", {}, operator.name),
-        auditEvent(id, "OTP_GENERATED", "SYSTEM", {}, null),
-        auditEvent(id, "APPROVAL_REQUESTED", "OPERATOR", {}, operator.name),
-      ],
-    });
     setStep(3);
+
+    try {
+      await commit({
+        transaction: pending,
+        photo: { full: photo.full, thumb: photo.thumb },
+        events: [
+          auditEvent(id, "TRANSACTION_CREATED", "OPERATOR", { offline: !online }, op.name),
+          auditEvent(id, "FARMER_SELECTED", "OPERATOR", { fpo_id: farmer.fpo_id }, op.name),
+          auditEvent(id, "WEIGHT_ENTERED", "OPERATOR", { weight: Number(weight) }, op.name),
+          auditEvent(id, "GRADE_SELECTED", "OPERATOR", { grade }, op.name),
+          auditEvent(id, "AUDIT_PHOTO_CAPTURED", "OPERATOR", {}, op.name),
+          auditEvent(id, "OTP_GENERATED", "SYSTEM", {}, null),
+          auditEvent(id, "APPROVAL_REQUESTED", "OPERATOR", {}, op.name),
+        ],
+      });
+    } catch (e) {
+      console.warn("Background commit error:", e);
+    }
   }, [farmer, grade, photo, operator, weight, crop, connection.browserOnline, commit]);
 
   function reset() {
