@@ -1,13 +1,14 @@
 -- ============================================================================
--- COMBINED_SETUP.SQL
--- Run this in your Supabase SQL Editor (https://supabase.com/dashboard/project/uujklkizvjtvqrzygnsa/sql/new)
+-- COMBINED_SETUP.SQL (100% Idempotent - Safe to re-run multiple times)
+-- Run this in your Supabase SQL Editor:
+-- https://supabase.com/dashboard/project/uujklkizvjtvqrzygnsa/sql/new
 -- ============================================================================
 
--- Enable extensions
+-- 1. Enable extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Clean up any prior types (for idempotency)
+-- 2. Custom Enums
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
@@ -46,7 +47,7 @@ BEGIN
   END IF;
 END $$;
 
--- 1. Profiles Table
+-- 3. Core Relational Tables
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
@@ -58,7 +59,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 2. Mandis Table
 CREATE TABLE IF NOT EXISTS public.mandis (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS public.mandis (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 3. Farmers Table
 CREATE TABLE IF NOT EXISTS public.farmers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID UNIQUE NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -87,7 +86,6 @@ CREATE TABLE IF NOT EXISTS public.farmers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 4. Operators Table
 CREATE TABLE IF NOT EXISTS public.operators (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID UNIQUE NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -99,7 +97,6 @@ CREATE TABLE IF NOT EXISTS public.operators (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 5. Admins Table
 CREATE TABLE IF NOT EXISTS public.admins (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID UNIQUE NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -107,7 +104,6 @@ CREATE TABLE IF NOT EXISTS public.admins (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 6. Produce Table
 CREATE TABLE IF NOT EXISTS public.produce (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   farmer_id UUID NOT NULL REFERENCES public.farmers(id) ON DELETE CASCADE,
@@ -121,7 +117,6 @@ CREATE TABLE IF NOT EXISTS public.produce (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 7. Rate Cards Table
 CREATE TABLE IF NOT EXISTS public.rate_cards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   produce_name TEXT NOT NULL,
@@ -136,7 +131,6 @@ CREATE TABLE IF NOT EXISTS public.rate_cards (
   CONSTRAINT unique_active_produce_rate UNIQUE (produce_name, version)
 );
 
--- 8. Transactions Table
 CREATE TABLE IF NOT EXISTS public.transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   transaction_number TEXT UNIQUE NOT NULL,
@@ -161,7 +155,6 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 9. Weighments Table
 CREATE TABLE IF NOT EXISTS public.weighments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   transaction_id UUID NOT NULL REFERENCES public.transactions(id) ON DELETE CASCADE,
@@ -174,7 +167,6 @@ CREATE TABLE IF NOT EXISTS public.weighments (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 10. Payments Table
 CREATE TABLE IF NOT EXISTS public.payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   transaction_id UUID NOT NULL REFERENCES public.transactions(id) ON DELETE CASCADE,
@@ -188,7 +180,6 @@ CREATE TABLE IF NOT EXISTS public.payments (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 11. Disputes Table
 CREATE TABLE IF NOT EXISTS public.disputes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dispute_code TEXT UNIQUE NOT NULL,
@@ -207,7 +198,6 @@ CREATE TABLE IF NOT EXISTS public.disputes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 12. Notifications Table
 CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -219,7 +209,6 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 13. Audit Logs Table
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -230,7 +219,7 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Performance Indexes
+-- 4. Indexes
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 CREATE INDEX IF NOT EXISTS idx_farmers_user_id ON public.farmers(user_id);
 CREATE INDEX IF NOT EXISTS idx_operators_user_id ON public.operators(user_id);
@@ -247,7 +236,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_farmer_id ON public.payments(farmer_id);
 CREATE INDEX IF NOT EXISTS idx_disputes_transaction_id ON public.disputes(transaction_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON public.audit_logs(user_id);
 
--- Enable RLS
+-- 5. Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mandis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.farmers ENABLE ROW LEVEL SECURITY;
@@ -262,7 +251,7 @@ ALTER TABLE public.disputes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
--- Helper Functions
+-- 6. Helper Functions (Security Definer)
 CREATE OR REPLACE FUNCTION public.auth_user_role()
 RETURNS public.user_role
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
@@ -288,53 +277,108 @@ RETURNS uuid
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
 AS $$ SELECT mandi_id FROM public.operators WHERE user_id = auth.uid() AND active = true; $$;
 
--- Policies
+-- 7. Drop and Recreate RLS Policies (Safe for repeated execution)
+DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_policy" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_admin_insert" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_admin_delete" ON public.profiles;
+
 CREATE POLICY "profiles_select_policy" ON public.profiles FOR SELECT TO authenticated USING (id = auth.uid() OR public.is_admin());
 CREATE POLICY "profiles_update_policy" ON public.profiles FOR UPDATE TO authenticated USING (id = auth.uid() OR public.is_admin());
 CREATE POLICY "profiles_admin_insert" ON public.profiles FOR INSERT TO authenticated WITH CHECK (public.is_admin() OR id = auth.uid());
+CREATE POLICY "profiles_admin_delete" ON public.profiles FOR DELETE TO authenticated USING (public.is_admin());
+
+DROP POLICY IF EXISTS "mandis_select_policy" ON public.mandis;
+DROP POLICY IF EXISTS "mandis_admin_all" ON public.mandis;
 
 CREATE POLICY "mandis_select_policy" ON public.mandis FOR SELECT TO authenticated USING (active = true OR public.is_admin());
 CREATE POLICY "mandis_admin_all" ON public.mandis FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "farmers_select_policy" ON public.farmers;
+DROP POLICY IF EXISTS "farmers_update_policy" ON public.farmers;
+DROP POLICY IF EXISTS "farmers_insert_policy" ON public.farmers;
+DROP POLICY IF EXISTS "farmers_delete_policy" ON public.farmers;
+
 CREATE POLICY "farmers_select_policy" ON public.farmers FOR SELECT TO authenticated USING (user_id = auth.uid() OR public.auth_user_role() = 'operator'::public.user_role OR public.is_admin());
 CREATE POLICY "farmers_update_policy" ON public.farmers FOR UPDATE TO authenticated USING (user_id = auth.uid() OR public.is_admin());
 CREATE POLICY "farmers_insert_policy" ON public.farmers FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() OR public.is_admin());
+CREATE POLICY "farmers_delete_policy" ON public.farmers FOR DELETE TO authenticated USING (public.is_admin());
+
+DROP POLICY IF EXISTS "operators_select_policy" ON public.operators;
+DROP POLICY IF EXISTS "operators_admin_all" ON public.operators;
 
 CREATE POLICY "operators_select_policy" ON public.operators FOR SELECT TO authenticated USING (user_id = auth.uid() OR public.is_admin());
 CREATE POLICY "operators_admin_all" ON public.operators FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "admins_select_policy" ON public.admins;
+DROP POLICY IF EXISTS "admins_manage_policy" ON public.admins;
+
 CREATE POLICY "admins_select_policy" ON public.admins FOR SELECT TO authenticated USING (public.is_admin());
 CREATE POLICY "admins_manage_policy" ON public.admins FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "produce_select_policy" ON public.produce;
+DROP POLICY IF EXISTS "produce_insert_policy" ON public.produce;
+DROP POLICY IF EXISTS "produce_update_policy" ON public.produce;
+DROP POLICY IF EXISTS "produce_delete_policy" ON public.produce;
 
 CREATE POLICY "produce_select_policy" ON public.produce FOR SELECT TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.auth_user_role() = 'operator'::public.user_role OR public.is_admin());
 CREATE POLICY "produce_insert_policy" ON public.produce FOR INSERT TO authenticated WITH CHECK (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
 CREATE POLICY "produce_update_policy" ON public.produce FOR UPDATE TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
+CREATE POLICY "produce_delete_policy" ON public.produce FOR DELETE TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
+
+DROP POLICY IF EXISTS "rate_cards_select_policy" ON public.rate_cards;
+DROP POLICY IF EXISTS "rate_cards_admin_manage" ON public.rate_cards;
 
 CREATE POLICY "rate_cards_select_policy" ON public.rate_cards FOR SELECT TO authenticated USING (active = true OR public.is_admin());
 CREATE POLICY "rate_cards_admin_manage" ON public.rate_cards FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "transactions_select_policy" ON public.transactions;
+DROP POLICY IF EXISTS "transactions_farmer_insert" ON public.transactions;
+DROP POLICY IF EXISTS "transactions_operator_update" ON public.transactions;
+DROP POLICY IF EXISTS "transactions_admin_delete" ON public.transactions;
+
 CREATE POLICY "transactions_select_policy" ON public.transactions FOR SELECT TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR (public.auth_user_role() = 'operator'::public.user_role AND mandi_id = public.get_auth_operator_mandi_id()) OR public.is_admin());
 CREATE POLICY "transactions_farmer_insert" ON public.transactions FOR INSERT TO authenticated WITH CHECK (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
 CREATE POLICY "transactions_operator_update" ON public.transactions FOR UPDATE TO authenticated USING ((public.auth_user_role() = 'operator'::public.user_role AND mandi_id = public.get_auth_operator_mandi_id()) OR public.is_admin());
+CREATE POLICY "transactions_admin_delete" ON public.transactions FOR DELETE TO authenticated USING (public.is_admin());
+
+DROP POLICY IF EXISTS "weighments_select_policy" ON public.weighments;
+DROP POLICY IF EXISTS "weighments_operator_insert" ON public.weighments;
+DROP POLICY IF EXISTS "weighments_admin_manage" ON public.weighments;
 
 CREATE POLICY "weighments_select_policy" ON public.weighments FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.transactions t WHERE t.id = weighments.transaction_id AND (t.farmer_id = public.get_auth_farmer_id() OR (public.auth_user_role() = 'operator'::public.user_role AND t.mandi_id = public.get_auth_operator_mandi_id()) OR public.is_admin())));
 CREATE POLICY "weighments_operator_insert" ON public.weighments FOR INSERT TO authenticated WITH CHECK ((public.auth_user_role() = 'operator'::public.user_role AND operator_id = public.get_auth_operator_id()) OR public.is_admin());
+CREATE POLICY "weighments_admin_manage" ON public.weighments FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "payments_select_policy" ON public.payments;
+DROP POLICY IF EXISTS "payments_admin_manage" ON public.payments;
 
 CREATE POLICY "payments_select_policy" ON public.payments FOR SELECT TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.is_admin() OR public.auth_user_role() = 'operator'::public.user_role);
 CREATE POLICY "payments_admin_manage" ON public.payments FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "disputes_select_policy" ON public.disputes;
+DROP POLICY IF EXISTS "disputes_farmer_insert" ON public.disputes;
+DROP POLICY IF EXISTS "disputes_update_policy" ON public.disputes;
 
 CREATE POLICY "disputes_select_policy" ON public.disputes FOR SELECT TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.auth_user_role() = 'operator'::public.user_role OR public.is_admin());
 CREATE POLICY "disputes_farmer_insert" ON public.disputes FOR INSERT TO authenticated WITH CHECK (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
 CREATE POLICY "disputes_update_policy" ON public.disputes FOR UPDATE TO authenticated USING (farmer_id = public.get_auth_farmer_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "notifications_select_policy" ON public.notifications;
+DROP POLICY IF EXISTS "notifications_update_policy" ON public.notifications;
+DROP POLICY IF EXISTS "notifications_insert_policy" ON public.notifications;
+
 CREATE POLICY "notifications_select_policy" ON public.notifications FOR SELECT TO authenticated USING (user_id = auth.uid() OR public.is_admin());
 CREATE POLICY "notifications_update_policy" ON public.notifications FOR UPDATE TO authenticated USING (user_id = auth.uid() OR public.is_admin());
 CREATE POLICY "notifications_insert_policy" ON public.notifications FOR INSERT TO authenticated WITH CHECK (true);
 
+DROP POLICY IF EXISTS "audit_logs_select_policy" ON public.audit_logs;
+DROP POLICY IF EXISTS "audit_logs_insert_policy" ON public.audit_logs;
+
 CREATE POLICY "audit_logs_select_policy" ON public.audit_logs FOR SELECT TO authenticated USING (public.is_admin());
 CREATE POLICY "audit_logs_insert_policy" ON public.audit_logs FOR INSERT TO authenticated WITH CHECK (true);
 
--- Triggers for User Profiles & Hashing
+-- 8. Triggers for User Profiles & Hashing
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
@@ -385,7 +429,7 @@ $$;
 DROP TRIGGER IF EXISTS trg_set_transaction_number ON public.transactions;
 CREATE TRIGGER trg_set_transaction_number BEFORE INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION public.set_transaction_number();
 
--- Seed Initial Mandis and Rate Cards
+-- 9. Seed Initial Mandis and Rate Cards
 INSERT INTO public.mandis (id, name, code, address, district, state, latitude, longitude, active)
 VALUES
   ('a1111111-1111-1111-1111-111111111111', 'Ratlam Main Mandi', 'MND-RTL-01', 'Industrial Area, Ratlam', 'Ratlam', 'Madhya Pradesh', 23.3315, 75.0367, true),
